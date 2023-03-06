@@ -28,9 +28,12 @@ services:
         - db_network
 
     web:
+      restart: unless-stopped
       container_name: dev_backend
       build: .
-      command: gunicorn bazar.wsgi:application --bind 0.0.0.0:8000
+      entrypoint: /app/server-entrypoint.sh
+      expose:
+        - 8000
       volumes:
         - .:/bazar
         - ./data/static_volume:/bazar/static
@@ -44,6 +47,26 @@ services:
       depends_on:
         - db
         - redis
+
+    worker:
+      restart: unless-stopped
+      build:
+        context: .
+        dockerfile: ./Dockerfile
+      entrypoint: /app/worker-entrypoint.sh
+      volumes:
+        - ./data/static_volume:/bazar/static
+      env_file: dev.env
+      depends_on:
+        - web
+        - redis
+
+    redis:
+      container_name: dev_redis
+      restart: unless-stopped
+      image: redis:alpine
+      ports:
+        - '6379:6379'
 
 networks:
   nginx_network:

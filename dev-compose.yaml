@@ -1,0 +1,59 @@
+version: '3.9'
+
+services:
+    nginx:
+      container_name: dev_web
+      restart: on-failure
+      image: nginx:1.23.3-alpine
+      volumes:
+        - ./nginx/prod/nginx.conf:/etc/nginx/conf.d/default.conf
+        - ./data/static_volume:/bazar/static
+        - ./data/media_volume:/bazar/media
+      ports:
+        - 80:80
+      networks:
+        - nginx_network
+      depends_on:
+        - web
+
+    db:
+      container_name: dev_db
+      image: postgres:15.2-alpine
+      env_file: dev.env
+      volumes:
+        - ./data/postgres_data:/var/lib/postgresql/data/
+      ports:
+        - 5432:5432
+      networks:
+        - db_network
+
+    web:
+      container_name: dev_backend
+      build: .
+      command: gunicorn bazar.wsgi:application --bind 0.0.0.0:8000
+      volumes:
+        - .:/bazar
+        - ./data/static_volume:/bazar/static
+        - ./data/media_volume:/bazar/media
+      env_file: dev.env
+      links: [ redis ]
+      networks:
+        - nginx_network
+        - db_network
+        - redis_network
+      depends_on:
+        - db
+        - redis
+
+networks:
+  nginx_network:
+    driver: bridge
+  db_network:
+    driver: bridge
+  redis_network:
+    driver: bridge
+
+volumes:
+  static_volume: null
+  postgres_data: null
+  media_volume: null

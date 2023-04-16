@@ -53,6 +53,14 @@ class SiteAdmin(admin.ModelAdmin):
     exclude = ('user',)
 
 
+    def save_model(self, request, obj, form, change):
+        """
+        Given a model instance save it to the database.
+        """
+        obj.user = request.user
+        obj.save()
+
+
     def get_queryset(self, request):
         qs = super(SiteAdmin, self).get_queryset(request)
         if request.user.is_superuser:

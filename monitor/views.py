@@ -67,9 +67,7 @@ class ScanAPIView(APIView):
                                                           "data": {'type': 'success', 'message':'Task started!'}})
         # sites = [site['url'] for site in list(Site.objects.filter(user=request.user).values('url'))]
         sites =[site for site in  list(Site.objects.filter(user=request.user).values('id','name','url'))]
-        print(sites)
         site_pulse_checker.delay(sites,request.user.username)
-        # async_to_sync(scanner)(sites,request.user)
         return Response(status=status.HTTP_200_OK, data={'message': "Success"})
 
 def main(request):

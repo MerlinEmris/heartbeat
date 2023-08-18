@@ -24,11 +24,6 @@ docker compose build
 docker compose up
 ```
 
-#### To run
-```bash
-docker compose up
-```
-
 #### To stop
 ```bash
 docker compose down

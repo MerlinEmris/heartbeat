@@ -30,6 +30,8 @@ services:
 
   redis:
     image: redis:7.0.9-alpine
+    ports:
+      - 6379:6379
 
   celery_worker:
     build:
